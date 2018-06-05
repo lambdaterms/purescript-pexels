@@ -1,0 +1,7 @@
+{
+  "name": "purescript-pexels",
+  "version": "0.0.1",
+  "devDependencies": {
+    "pulp": "^12.0.1"
+  }
+}

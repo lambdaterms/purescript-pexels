@@ -36,5 +36,5 @@ searchResult :: forall m. Monad m => JsValidation m Result
 searchResult = collect
   { totalResults: field "total_results" int
   , nextPage: optionalField "next_page" (Just <$> string)
-  , prevPage: optionalField "next_page" (Just <$> string)
+  , prevPage: optionalField "prev_page" (Just <$> string)
   }

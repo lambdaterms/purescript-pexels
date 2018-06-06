@@ -7,3 +7,8 @@
 /.psc*
 /.purs*
 /.psa*
+basics.sh
+load.sh
+package-lock.json
+basics.sh
+package.json

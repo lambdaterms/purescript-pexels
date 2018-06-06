@@ -2,6 +2,7 @@ module API.Pexels.Search where
 
 import Prelude
 
+import Data.Either (Either)
 import Data.FormURLEncoded (FormURLEncoded(..), fromArray)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
@@ -44,8 +45,9 @@ type Photo =
 --   }
 
 type Result =
-  { totalResults ∷ Int
+  { totalResults ∷ Either String Int
   , nextPage ∷ Maybe String
   , prevPage ∷ Maybe String
   -- , photos ∷ Array Photo
   }
+

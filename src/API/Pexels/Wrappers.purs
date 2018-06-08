@@ -2,12 +2,8 @@ module API.Pexels.Search where
 
 import Prelude
 
-import Data.Either (Either)
-import Data.FormURLEncoded (FormURLEncoded(..), fromArray)
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
+import Data.FormURLEncoded (FormURLEncoded, fromArray)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype)
 import Data.Tuple (Tuple(..))
 
 newtype ApiKey = ApiKey String
@@ -25,8 +21,14 @@ toUrlEncoded { query, page, perPage } = fromArray $
   , Tuple "page" (Just $ show page)
   ]
 
+-- TODO: impl
+
+urlToRequest:: String -> Request
+urlToRequest url = {query: "aaa",page: 5,perPage: 15 }
+
 type Photo =
-  { width :: Int
+  { id:: Int
+  ,  width :: Int
   , height :: Int
   , url :: String
   }
@@ -44,10 +46,18 @@ type Photo =
 --     }, (NEXT PHOTOS)]
 --   }
 
+-- TODO: Add photo list
 type Result =
-  { totalResults ∷ Either String Int
+  { totalResults ∷ Int
   , nextPage ∷ Maybe String
   , prevPage ∷ Maybe String
   -- , photos ∷ Array Photo
   }
 
+--TODO: use this polimorphism in other methods
+type ResultBaseRow extra = (page:: Int, perPage:: Int, 
+-- photos :: Array Photo, 
+    nextPage :: Maybe Request, prevPage :: Maybe Request | extra)
+
+type CuratedPhotos = { | ResultBaseRow () }
+type SearchPhotos = { | ResultBaseRow (totalResults :: Int) }

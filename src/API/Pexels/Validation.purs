@@ -2,7 +2,7 @@ module API.Pexels.Validation where
 
 import Prelude
 
-import API.Pexels.Search (SearchPhotos, urlToRequest)
+import API.Pexels.Search (SearchPhotos, Photo, urlToRequest)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Error.Class (catchError)
 import Data.Argonaut (Json, jsonParser)
@@ -14,7 +14,7 @@ import Network.HTTP.Affjax.Request (class Requestable)
 import Network.HTTP.Affjax.Response (class Respondable)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Polyform.Validation (V(Invalid, Valid), Validation, hoistFnMV, hoistFnV, lmapValidation)
-import Validators.Json (JsValidation, field, int, optionalField, string)
+import Validators.Json (JsError, JsValidation, array, arrayOf, field, int, optionalField, string)
 
 validateAffjax :: forall t16 t17 t18.
   Requestable t17 => Respondable t16 => Validation
@@ -52,8 +52,17 @@ getResultfromJson = collect
   , prevPage: ((<$>) urlToRequest) <$> (optionalField "prev_page" (Just <$> string))
   , page: field "page" int
   , perPage: field "per_page" int
+  , photos: field "photos" $ arrayOf getPhotosfromJson
 }
 
+getPhotosfromJson :: forall t.
+  Monad t => Validation t (Array JsError) Json Photo
+getPhotosfromJson = collect
+  { id: field "id" int
+  ,  width: field "width" int
+  , height: field  "height" int
+  , url: field "url" string
+  }
 
 stringifyErrs
   :: forall m e a b

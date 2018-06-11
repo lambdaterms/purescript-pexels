@@ -46,17 +46,8 @@ type Photo =
 --     }, (NEXT PHOTOS)]
 --   }
 
--- TODO: Add photo list
-type Result =
-  { totalResults ∷ Int
-  , nextPage ∷ Maybe String
-  , prevPage ∷ Maybe String
-  -- , photos ∷ Array Photo
-  }
-
 --TODO: use this polimorphism in other methods
-type ResultBaseRow extra = (page:: Int, perPage:: Int, 
--- photos :: Array Photo, 
+type ResultBaseRow extra = (page:: Int, perPage:: Int, photos :: Array Photo, 
     nextPage :: Maybe Request, prevPage :: Maybe Request | extra)
 
 type CuratedPhotos = { | ResultBaseRow () }

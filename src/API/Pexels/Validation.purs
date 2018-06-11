@@ -2,7 +2,7 @@ module API.Pexels.Validation where
 
 import Prelude
 
-import API.Pexels.Search (SearchPhotos, Photo, urlToRequest)
+import API.Pexels.Search (Photo, SearchPhotos, CuratedPhotos)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Error.Class (catchError)
 import Data.Argonaut (Json, jsonParser)
@@ -14,7 +14,7 @@ import Network.HTTP.Affjax.Request (class Requestable)
 import Network.HTTP.Affjax.Response (class Respondable)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Polyform.Validation (V(Invalid, Valid), Validation, hoistFnMV, hoistFnV, lmapValidation)
-import Validators.Json (JsError, JsValidation, array, arrayOf, field, int, optionalField, string)
+import Validators.Json (JsError, JsValidation, arrayOf, field, int, optionalField, string)
 
 validateAffjax :: forall t16 t17 t18.
   Requestable t17 => Respondable t16 => Validation
@@ -44,16 +44,27 @@ validateStatus = hoistFnV (\response -> case response.status of
     _ -> Invalid ["server response status other than 200!"])
 
 
-getResultfromJson :: forall m. Monad m => JsValidation m SearchPhotos
+getSearchResultfromJson :: forall m. Monad m => JsValidation m SearchPhotos
 
-getResultfromJson = collect
+getSearchResultfromJson = collect
   { totalResults: field "total_results" int
-  , nextPage: ((<$>) urlToRequest) <$> (optionalField "next_page" (Just <$> string))
-  , prevPage: ((<$>) urlToRequest) <$> (optionalField "prev_page" (Just <$> string))
+  , nextPage: optionalField "next_page" (Just <$> string)
+  , prevPage: optionalField "prev_page" (Just <$> string)
   , page: field "page" int
   , perPage: field "per_page" int
   , photos: field "photos" $ arrayOf getPhotosfromJson
 }
+
+getCuratedResultfromJson :: forall m. Monad m => JsValidation m CuratedPhotos
+
+getCuratedResultfromJson = collect
+  { nextPage: optionalField "next_page" (Just <$> string)
+  , prevPage: optionalField "prev_page" (Just <$> string)
+  , page: field "page" int
+  , perPage: field "per_page" int
+  , photos: field "photos" $ arrayOf getPhotosfromJson
+}
+
 
 getPhotosfromJson :: forall t.
   Monad t => Validation t (Array JsError) Json Photo

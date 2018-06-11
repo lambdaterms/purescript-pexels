@@ -12,3 +12,5 @@ load.sh
 package-lock.json
 basics.sh
 package.json
+test/key.purs
+.vscode/tasks.json

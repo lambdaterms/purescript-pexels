@@ -8,22 +8,30 @@ import Data.Tuple (Tuple(..))
 
 newtype ApiKey = ApiKey String
 
-type Request =
-  { query :: String
-  , page :: Int
-  , perPage :: Int
-  }
+type BaseRequest extra = (page :: Int , perPage :: Int | extra)
 
-toUrlEncoded ∷ Request → FormURLEncoded
-toUrlEncoded { query, page, perPage } = fromArray $
+type SearchRequest = { | BaseRequest (query :: String) }
+type CuratedRequest = { | BaseRequest ()}
+
+
+searchRequestToUrlEncoded ∷ SearchRequest → FormURLEncoded
+searchRequestToUrlEncoded { query, page, perPage } = fromArray $
   [ Tuple "query" (Just query)
   , Tuple "per_page" (Just $ show perPage)
   , Tuple "page" (Just $ show page)
   ]
 
+curatedRequestToUrlEncoded ∷ CuratedRequest → FormURLEncoded
+curatedRequestToUrlEncoded { page, perPage } = fromArray $
+  [ Tuple "per_page" (Just $ show perPage)
+  , Tuple "page" (Just $ show page)
+  ]
+
+
 -- TODO: impl
 
-urlToRequest:: String -> Request
+
+urlToRequest:: String -> SearchRequest
 urlToRequest url = {query: "aaa",page: 5,perPage: 15 }
 
 type Photo =
@@ -48,7 +56,7 @@ type Photo =
 
 --TODO: use this polimorphism in other methods
 type ResultBaseRow extra = (page:: Int, perPage:: Int, photos :: Array Photo, 
-    nextPage :: Maybe Request, prevPage :: Maybe Request | extra)
+    nextPage :: Maybe String, prevPage :: Maybe String | extra)
 
 type CuratedPhotos = { | ResultBaseRow () }
 type SearchPhotos = { | ResultBaseRow (totalResults :: Int) }

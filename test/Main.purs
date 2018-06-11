@@ -2,9 +2,9 @@ module Test.Main where
   
 import Prelude
 
-import API.Pexels.Methods (buildRequest, searchWithValidation)
-import API.Pexels.Search (ApiKey(..), Request, toUrlEncoded)
-import API.Pexels.Validation (getJson, getResultfromJson, stringifyErrs, validateStatus)
+import API.Pexels.Methods (buildSearchRequest, curatedWithValidation, searchWithValidation)
+import API.Pexels.Search (ApiKey(..), CuratedPhotos, SearchRequest, CuratedRequest)
+import API.Pexels.Validation (getJson, getSearchResultfromJson, stringifyErrs, validateStatus)
 import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
@@ -13,12 +13,16 @@ import Data.Argonaut (Json)
 import Data.FormURLEncoded (encode)
 import Data.List.Lazy (alterAt)
 import Global.Unsafe (unsafeStringify)
+import Key (key)
 import Network.HTTP.Affjax (AJAX, AffjaxResponse, affjax)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Polyform.Validation (V, runValidation)
 --structures for tests
-simpleRequest1 :: Request
+simpleRequest1 :: SearchRequest
 simpleRequest1 = {query: "dog", page: 1, perPage: 15}
+
+simpleCuratedRequest :: CuratedRequest
+simpleCuratedRequest = {page: 1, perPage: 15}
 
 simpleRequest1Str :: String
 simpleRequest1Str = "query=dog&per_page=15&page=1"
@@ -44,7 +48,7 @@ validateStatusTest = (runValidation validateStatus) simpleResponse1
 
 getJsonTest json = (runValidation getJson) (simpleResponse1 {response = json})
 
-getAndValidateJsonTest json = (runValidation $ stringifyErrs(getResultfromJson) <<< getJson) (simpleResponse1 {response = json})
+getAndValidateJsonTest json = (runValidation $ stringifyErrs(getSearchResultfromJson) <<< getJson) (simpleResponse1 {response = json})
 
 main :: forall t22.
   Eff
@@ -61,7 +65,7 @@ main :: forall t22.
     )
 -- TODO: make "real" tests with asserts
 main = launchAff $ do
-    (a :: AffjaxResponse Json) <- affjax $ buildRequest (ApiKey "secretApiKey") simpleRequest1 
+    (a :: AffjaxResponse Json) <- affjax $ buildSearchRequest (ApiKey key) simpleRequest1 
     res1 <- (unsafeStringify <$> validateStatusTest)
     log res1
     res2 <- (unsafeStringify <$> getJsonTest simpleNotJson)
@@ -70,5 +74,7 @@ main = launchAff $ do
     log res3
     res4 <- (unsafeStringify <$> getAndValidateJsonTest simpleJsonWrongFromat)
     log res4
-    a <- searchWithValidation (ApiKey "secretApiKey") simpleRequest1
+    a <- searchWithValidation (ApiKey key) simpleRequest1
     log $ unsafeStringify a
+    res6 <- curatedWithValidation (ApiKey key) simpleCuratedRequest
+    log $ unsafeStringify res6

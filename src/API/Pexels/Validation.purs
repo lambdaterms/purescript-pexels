@@ -39,14 +39,21 @@ validateAffjax = hoistFnMV $ \req → do
 
 
 validateStatus :: forall m err res.
-  Monad m => Validation m
+  Monad m => (StatusCode -> Boolean) ->Validation m
                 (Array (Variant (HttpErrorRow err)))
                 (AffjaxResponse res)
                 (AffjaxResponse res)
-validateStatus = hoistFnV (\response -> case response.status of
-    StatusCode 200 -> Valid [] response
-    _ -> Invalid $ singleton $ (inj (SProxy :: SProxy "wrongHttpStatus") response.status))
 
+validateStatus isCorrect = hoistFnV checkStatus where
+  checkStatus response =
+      if isCorrect response.status then
+        Valid [] response
+      else
+        Invalid $ singleton $ (inj (SProxy :: SProxy "wrongHttpStatus") response.status)
+        
+
+isOK :: StatusCode -> Boolean
+isOK (StatusCode n) = (n==200)
 
 
 getJson :: forall m err.
@@ -54,6 +61,7 @@ getJson :: forall m err.
                  (Array (Variant (JsonErrorRow err)))
                  (AffjaxResponse String)
                  Json
+
 getJson = hoistFnV \response -> case jsonParser response.response of
   Right js -> Valid [] js
   Left error -> Invalid  $ singleton $ (inj (SProxy :: SProxy "parsingError") error)
@@ -64,6 +72,7 @@ getSearchResultfromJson :: forall err m.
                   (Array (Variant (JsError err) ))
                   Json
                   SearchPhotos
+
 getSearchResultfromJson = collect
   { totalResults: field "total_results" int
   , nextPage: optionalField "next_page" (Just <$> string)
@@ -72,6 +81,7 @@ getSearchResultfromJson = collect
   , perPage: field "per_page" int
   , photos: field "photos" $ arrayOf getPhotosfromJson
 }
+
 
 getCuratedResultfromJson :: forall err m.
   Monad m => Validation m
@@ -87,11 +97,13 @@ getCuratedResultfromJson = collect
   , photos: field "photos" $ arrayOf getPhotosfromJson
 }
 
+
 getPhotosfromJson :: forall err m.
   Monad m => Validation m
                   (Array (Variant (JsError err) ))
                   Json
                   Photo
+
 getPhotosfromJson = collect
   { id: field "id" int
   ,  width: field "width" int

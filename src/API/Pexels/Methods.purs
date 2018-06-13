@@ -3,7 +3,7 @@ module API.Pexels.Methods where
 import Prelude
 
 import API.Pexels.Search (ApiKey(ApiKey), CuratedRequest, SearchPhotos, SearchRequest, CuratedPhotos, curatedRequestToUrlEncoded, searchRequestToUrlEncoded)
-import API.Pexels.Validation (getCuratedResultfromJson, getJson, getSearchResultfromJson, validateAffjax, validateStatus)
+import API.Pexels.Validation (getCuratedResultfromJson, getJson, getSearchResultfromJson, isOK, validateAffjax, validateStatus)
 import Control.Monad.Aff (Aff)
 import Data.Array ((:))
 import Data.Either (Either(Left))
@@ -49,7 +49,7 @@ searchWithValidation :: forall t1 err.
                    | err
                    ))) SearchPhotos )
 searchWithValidation apiKey request = runValidation 
-  ( getSearchResultfromJson <<< getJson <<< validateStatus <<< validateAffjax ) (buildSearchRequest apiKey request)
+  ( getSearchResultfromJson <<< getJson <<< (validateStatus isOK) <<< validateAffjax ) (buildSearchRequest apiKey request)
 
 curatedWithValidation :: forall t1 err.
   ApiKey -> CuratedRequest -> Aff( ajax :: AJAX | t1) (V (Array (
@@ -62,4 +62,4 @@ curatedWithValidation :: forall t1 err.
                    | err
                    ))) CuratedPhotos )
 curatedWithValidation apiKey request = runValidation 
-  ( getCuratedResultfromJson <<< getJson <<< validateStatus <<< validateAffjax ) (buildCuratedRequest apiKey request)
+  ( getCuratedResultfromJson <<< getJson <<< (validateStatus isOK)<<< validateAffjax ) (buildCuratedRequest apiKey request)

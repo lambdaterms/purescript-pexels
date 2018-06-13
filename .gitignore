@@ -14,3 +14,5 @@ basics.sh
 package.json
 test/key.purs
 .vscode/tasks.json
+test/Testy.purs
+test/Testy.purs

@@ -2,9 +2,9 @@ module Test.Main where
   
 import Prelude
 
-import API.Pexels.Methods (buildSearchRequest, curatedWithValidation, searchWithValidation)
+import API.Pexels.Methods (buildSearchRequest, curated, search)
 import API.Pexels.Search (ApiKey(ApiKey), CuratedRequest, SearchRequest)
-import API.Pexels.Validation (getJson, getSearchResultfromJson, validateStatus)
+import API.Pexels.Validation (getJson, getSearchResultfromJson, isOK, validateStatus)
 import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
@@ -42,7 +42,7 @@ simpleJson1 = "{\"total_results\":10,\"page\":1,\"per_page\":15}"
 
 --functions for running tests
 
-validateStatusTest = (runValidation validateStatus) simpleResponse1
+validateStatusTest = (runValidation $ validateStatus isOK) simpleResponse1
 
 getJsonTest json = (runValidation getJson) (simpleResponse1 {response = json})
 
@@ -72,7 +72,7 @@ main = launchAff $ do
     log res3
     res4 <- (unsafeStringify <$> getAndValidateJsonTest simpleJsonWrongFromat)
     log res4
-    a <- searchWithValidation (ApiKey key) simpleRequest1
+    a <- search (ApiKey key) simpleRequest1
     log $ unsafeStringify a
-    res6 <- curatedWithValidation (ApiKey key) simpleCuratedRequest
+    res6 <- curated (ApiKey key) simpleCuratedRequest
     log $ unsafeStringify res6

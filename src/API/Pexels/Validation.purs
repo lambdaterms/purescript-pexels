@@ -23,7 +23,7 @@ import Validators.Json (JsError, arrayOf, field, int, optionalField, string)
 type HttpErrorRow (err :: # Type) = (wrongHttpStatus :: StatusCode | err)
 type JsonErrorRow (err :: # Type) = (parsingError :: String | err)
 type AffjaxErrorRow (err :: # Type) = (remoteError :: String | err)
-
+type SearchErrorRow (err :: # Type) = HttpErrorRow (JsError (JsonErrorRow (AffjaxErrorRow err)))
 
 
 

@@ -41,20 +41,6 @@ type Photo =
   , url :: String
   }
 
---     photographer: "Name",
---     src: {
---       original: "https://*.jpg",
---       large: "https://*.jpg",
---       large2x: "https://*.jpg",
---       medium: "https://*.jpg",
---       small: "https://*.jpg",
---       portrait: "https://*.jpg",
---       landscape: "https://*.jpg",
---       tiny: "https://*.jpg"
---     }, (NEXT PHOTOS)]
---   }
-
---TODO: use this polimorphism in other methods
 type ResultBaseRow extra = (page:: Int, perPage:: Int, photos :: Array Photo, 
     nextPage :: Maybe String, prevPage :: Maybe String | extra)
 

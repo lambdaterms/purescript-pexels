@@ -3,20 +3,18 @@ module Test.Main where
 import Prelude
 
 import API.Pexels.Methods (buildSearchRequest, curatedWithValidation, searchWithValidation)
-import API.Pexels.Search (ApiKey(..), CuratedPhotos, SearchRequest, CuratedRequest)
-import API.Pexels.Validation (getJson, getSearchResultfromJson, stringifyErrs, validateStatus)
+import API.Pexels.Search (ApiKey(ApiKey), CuratedRequest, SearchRequest)
+import API.Pexels.Validation (getJson, getSearchResultfromJson, validateStatus)
 import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Data.Argonaut (Json)
-import Data.FormURLEncoded (encode)
-import Data.List.Lazy (alterAt)
 import Global.Unsafe (unsafeStringify)
 import Key (key)
 import Network.HTTP.Affjax (AJAX, AffjaxResponse, affjax)
 import Network.HTTP.StatusCode (StatusCode(..))
-import Polyform.Validation (V, runValidation)
+import Polyform.Validation (runValidation)
 --structures for tests
 simpleRequest1 :: SearchRequest
 simpleRequest1 = {query: "dog", page: 1, perPage: 15}
@@ -48,7 +46,7 @@ validateStatusTest = (runValidation validateStatus) simpleResponse1
 
 getJsonTest json = (runValidation getJson) (simpleResponse1 {response = json})
 
-getAndValidateJsonTest json = (runValidation $ stringifyErrs(getSearchResultfromJson) <<< getJson) (simpleResponse1 {response = json})
+getAndValidateJsonTest json = (runValidation $ getSearchResultfromJson <<< getJson) (simpleResponse1 {response = json})
 
 main :: forall t22.
   Eff

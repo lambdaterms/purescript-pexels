@@ -3,6 +3,7 @@
   "set": "df",
   "source": "https://github.com/paluh/package-sets.git",
   "depends": [
+    "validators",
     "affjax",
     "console",
     "eff",
@@ -12,7 +13,6 @@
     "psci-support",
     "record-fold",
     "strings",
-    "these",
-    "validators"
+    "these"
   ]
 }

@@ -3,8 +3,8 @@ module Test.Main where
 import Prelude
 
 import API.Pexels.Methods (buildSearchRequest, curated, search)
-import API.Pexels.Search (ApiKey(ApiKey), CuratedRequest, SearchRequest)
-import API.Pexels.Validation (getJson, getSearchResultfromJson, isOK, validateStatus)
+import API.Pexels.Types (ApiKey(ApiKey), CuratedRequest, SearchRequest)
+import API.Pexels.Validation (getJson, getSearchResultfromJson, isOK, validateAffjax, validateStatus)
 import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
@@ -19,6 +19,10 @@ import Polyform.Validation (runValidation)
 simpleRequest1 :: SearchRequest
 simpleRequest1 = {query: "dog", page: 1, perPage: 15}
 
+
+rJson :: String
+rJson = "{\"total_results\":876,\"page\":1,\"per_page\":15,\"photos\":[],\"next_page\":\"https://api.pexels.com/v1/search/?page=2&per_page=15&query=dog\"}"
+
 simpleCuratedRequest :: CuratedRequest
 simpleCuratedRequest = {page: 1, perPage: 15}
 
@@ -32,7 +36,7 @@ simpleNotJson :: String
 simpleNotJson = "aaaabbbccc"
 
 simpleJson :: String
-simpleJson = "{\"page\":1,\"per_page\":15}"
+simpleJson = "{\"page\":1,\"per_page\":15, \"photos\": {}}"
 
 simpleJsonWrongFromat :: String
 simpleJsonWrongFromat = "{\"total_results\":\"dddd\",\"page\":1,\"per_page\":15}"
@@ -68,10 +72,12 @@ main = launchAff $ do
     log res1
     res2 <- (unsafeStringify <$> getJsonTest simpleNotJson)
     log res2
-    res3 <- (unsafeStringify <$> getJsonTest simpleJson)
+    res3 <- (unsafeStringify <$> getJsonTest rJson)
     log res3
-    res4 <- (unsafeStringify <$> getAndValidateJsonTest simpleJsonWrongFromat)
+    res4 <- (unsafeStringify <$> getAndValidateJsonTest rJson)
     log res4
+    resa <- (unsafeStringify <$>  runValidation  (getJson <<< (validateStatus isOK)<<< validateAffjax ) (buildSearchRequest (ApiKey key) simpleRequest1))
+    log resa
     a <- search (ApiKey key) simpleRequest1
     log $ unsafeStringify a
     res6 <- curated (ApiKey key) simpleCuratedRequest

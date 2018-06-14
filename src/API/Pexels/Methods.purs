@@ -2,18 +2,16 @@ module API.Pexels.Methods where
 
 import Prelude
 
-import API.Pexels.Search (ApiKey(ApiKey), CuratedRequest, SearchPhotos, SearchRequest, CuratedPhotos, curatedRequestToUrlEncoded, searchRequestToUrlEncoded)
+import API.Pexels.Types (ApiKey(ApiKey), CuratedRequest, SearchPhotos, SearchRequest, CuratedPhotos, curatedRequestToUrlEncoded, searchRequestToUrlEncoded)
 import API.Pexels.Validation (SearchErrorRow, getCuratedResultfromJson, getJson, getSearchResultfromJson, isOK, validateAffjax, validateStatus)
 import Control.Monad.Aff (Aff)
 import Data.Array ((:))
 import Data.Either (Either(Left))
 import Data.FormURLEncoded (encode)
 import Data.HTTP.Method (Method(GET))
-import Data.List (List)
 import Data.Variant (Variant)
 import Network.HTTP.Affjax (AJAX, AffjaxRequest, defaultRequest)
 import Network.HTTP.RequestHeader (RequestHeader(..))
-import Network.HTTP.StatusCode (StatusCode)
 import Polyform.Validation (V, runValidation)
 
 

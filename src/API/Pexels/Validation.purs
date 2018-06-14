@@ -2,12 +2,12 @@ module API.Pexels.Validation where
 
 import Prelude
 
-import API.Pexels.Search (CuratedPhotos, SearchPhotos, Photo)
+import API.Pexels.Types (CuratedPhotos, Photo, SearchPhotos, urlToCuratedRequest, urlToSearchRequest)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Error.Class (catchError)
 import Data.Argonaut (Json, jsonParser)
 import Data.Array (singleton)
-import Data.Either (Either(..))
+import Data.Either (Either(..), hush)
 import Data.Functor.Variant (SProxy(..))
 import Data.Maybe (Maybe(..))
 import Data.Record.Fold (collect)
@@ -75,8 +75,8 @@ getSearchResultfromJson :: forall err m.
 
 getSearchResultfromJson = collect
   { totalResults: field "total_results" int
-  , nextPage: optionalField "next_page" (Just <$> string)
-  , prevPage: optionalField "prev_page" (Just <$> string)
+  , nextPage: (\x -> hush $ urlToSearchRequest x) <$> (optionalField "next_page" string)
+  , prevPage: (\x -> hush $ urlToSearchRequest x) <$> (optionalField "prev_page"  string)
   , page: field "page" int
   , perPage: field "per_page" int
   , photos: field "photos" $ arrayOf getPhotosfromJson
@@ -90,8 +90,8 @@ getCuratedResultfromJson :: forall err m.
                   CuratedPhotos
 
 getCuratedResultfromJson = collect
-  { nextPage: optionalField "next_page" (Just <$> string)
-  , prevPage: optionalField "prev_page" (Just <$> string)
+  {  nextPage: (\x -> hush $ urlToCuratedRequest x) <$> (optionalField "next_page"  string)
+  , prevPage: (\x -> hush $ urlToCuratedRequest x) <$> (optionalField "prev_page"  string)
   , page: field "page" int
   , perPage: field "per_page" int
   , photos: field "photos" $ arrayOf getPhotosfromJson

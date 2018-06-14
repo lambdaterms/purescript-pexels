@@ -1,8 +1,10 @@
 module API.Pexels.Types where
 
 import Prelude
+
+import Control.Extend ((<<=))
 import Data.Array ((!!))
-import Data.Either (Either, note)
+import Data.Either (Either, hush, note)
 import Data.FormURLEncoded (FormURLEncoded, fromArray)
 import Data.Int (fromString)
 import Data.Maybe (Maybe(..))
@@ -33,25 +35,21 @@ curatedRequestToUrlEncoded { page, perPage } = fromArray $
 
 -- TODO: impl
 
-urlToSearchRequest:: String -> (Either String SearchRequest)
+urlToSearchRequest:: String -> (Maybe SearchRequest)
 urlToSearchRequest url = do
-                          parsedUrl <- parseUrlencoded url
-                          query <- join $ note"" $ note "" <$> snd <$> (parsedUrl !! 2)
-                          page <- (join $ note "" $ note "" <$> snd <$> (parsedUrl !! 0))
-                          perPage <- join $ note "" $ note "" <$> snd <$> (parsedUrl !! 1)
-                          pageInt <- note "" $ fromString page
-                          perPageInt <- note "" $ fromString perPage
-                          pure {query: query, page: pageInt, perPage: perPageInt }
+                          parsedUrl <- hush $ parseUrlencoded url
+                          query <- (parsedUrl !! 2) >>= snd
+                          page <- (parsedUrl !! 0) >>= snd >>= fromString
+                          perPage <- (parsedUrl !! 1) >>= snd >>= fromString
+                          pure {query: query, page: page, perPage: perPage }
 
 
-urlToCuratedRequest:: String -> (Either String CuratedRequest)
+urlToCuratedRequest:: String -> (Maybe CuratedRequest)
 urlToCuratedRequest url = do
-                          parsedUrl <- parseUrlencoded url
-                          page <- (join $ note "" $ note "" <$> snd <$> (parsedUrl !! 0))
-                          perPage <- join $ note "" $ note "" <$> snd <$> (parsedUrl !! 1)
-                          pageInt <- note "" $ fromString page
-                          perPageInt <- note "" $ fromString perPage
-                          pure {page: pageInt, perPage: perPageInt }
+                          parsedUrl <- hush $ parseUrlencoded url
+                          page <- (parsedUrl !! 0) >>= snd >>= fromString
+                          perPage <- (parsedUrl !! 1) >>= snd >>= fromString
+                          pure {page: page, perPage: perPage }
 
 
 type Photo =

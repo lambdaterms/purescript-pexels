@@ -75,8 +75,8 @@ getSearchResultfromJson :: forall err m.
 
 getSearchResultfromJson = collect
   { totalResults: field "total_results" int
-  , nextPage: (\x -> hush $ urlToSearchRequest x) <$> (optionalField "next_page" string)
-  , prevPage: (\x -> hush $ urlToSearchRequest x) <$> (optionalField "prev_page"  string)
+  , nextPage: urlToSearchRequest <$> (optionalField "next_page" string)
+  , prevPage: urlToSearchRequest <$> (optionalField "prev_page"  string)
   , page: field "page" int
   , perPage: field "per_page" int
   , photos: field "photos" $ arrayOf getPhotosfromJson
@@ -90,8 +90,8 @@ getCuratedResultfromJson :: forall err m.
                   CuratedPhotos
 
 getCuratedResultfromJson = collect
-  {  nextPage: (\x -> hush $ urlToCuratedRequest x) <$> (optionalField "next_page"  string)
-  , prevPage: (\x -> hush $ urlToCuratedRequest x) <$> (optionalField "prev_page"  string)
+  { nextPage: urlToCuratedRequest <$> (optionalField "next_page" string)
+  , prevPage: urlToCuratedRequest <$> (optionalField "prev_page"  string)
   , page: field "page" int
   , perPage: field "per_page" int
   , photos: field "photos" $ arrayOf getPhotosfromJson

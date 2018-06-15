@@ -14,7 +14,6 @@ import Network.HTTP.Affjax (AJAX, AffjaxRequest, defaultRequest)
 import Network.HTTP.RequestHeader (RequestHeader(..))
 import Polyform.Validation (V, runValidation)
 
-
 buildSearchRequest :: ApiKey -> SearchRequest -> AffjaxRequest Unit
 buildSearchRequest (ApiKey apiKey) r =
   let

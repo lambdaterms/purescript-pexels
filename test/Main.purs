@@ -54,31 +54,31 @@ getAndValidateJsonTest json = (runValidation $ getSearchResultfromJson <<< getJs
 
 main :: forall t22.
   Eff
-    ( ajax :: AJAX
-    , console :: CONSOLE
-    | t22
-    )
-    (Fiber
-       ( ajax :: AJAX
-       , console :: CONSOLE
-       | t22
-       )
-       Unit
-    )
+  ( ajax :: AJAX
+  , console :: CONSOLE
+  | t22
+  )
+  (Fiber
+      ( ajax :: AJAX
+      , console :: CONSOLE
+      | t22
+      )
+      Unit
+  )
 -- TODO: make "real" tests with asserts
 main = launchAff $ do
-    (a :: AffjaxResponse Json) <- affjax $ buildSearchRequest (ApiKey key) simpleRequest1 
-    res1 <- (unsafeStringify <$> validateStatusTest)
-    log res1
-    res2 <- (unsafeStringify <$> getJsonTest simpleNotJson)
-    log res2
-    res3 <- (unsafeStringify <$> getJsonTest rJson)
-    log res3
-    res4 <- (unsafeStringify <$> getAndValidateJsonTest rJson)
-    log res4
-    resa <- (unsafeStringify <$>  runValidation  (getJson <<< (validateStatus isOK)<<< validateAffjax ) (buildSearchRequest (ApiKey key) simpleRequest1))
-    log resa
-    a <- search (ApiKey key) simpleRequest1
-    log $ unsafeStringify a
-    res6 <- curated (ApiKey key) simpleCuratedRequest
-    log $ unsafeStringify res6
+  (a :: AffjaxResponse Json) <- affjax $ buildSearchRequest (ApiKey key) simpleRequest1 
+  res1 <- (unsafeStringify <$> validateStatusTest)
+  log res1
+  res2 <- (unsafeStringify <$> getJsonTest simpleNotJson)
+  log res2
+  res3 <- (unsafeStringify <$> getJsonTest rJson)
+  log res3
+  res4 <- (unsafeStringify <$> getAndValidateJsonTest rJson)
+  log res4
+  resa <- (unsafeStringify <$>  runValidation  (getJson <<< (validateStatus isOK)<<< validateAffjax ) (buildSearchRequest (ApiKey key) simpleRequest1))
+  log resa
+  a <- search (ApiKey key) simpleRequest1
+  log $ unsafeStringify a
+  res6 <- curated (ApiKey key) simpleCuratedRequest
+  log $ unsafeStringify res6

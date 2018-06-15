@@ -16,13 +16,13 @@ type SearchRequest = { | BaseRequest (query :: String) }
 type CuratedRequest = { | BaseRequest ()}
 
 type Photo =
-  { id:: Int
-  ,  width :: Int
+  { id :: Int
+  , width :: Int
   , height :: Int
   , url :: String
   }
 
-type ResultBaseRow extra = (page:: Int, perPage:: Int, photos :: Array Photo | extra)
+type ResultBaseRow extra = (page :: Int, perPage :: Int, photos :: Array Photo | extra)
 
 type CuratedPhotos = { | ResultBaseRow
   ( nextPage :: Maybe CuratedRequest
@@ -33,20 +33,20 @@ type SearchPhotos = { | ResultBaseRow
   , nextPage :: Maybe SearchRequest
   , prevPage :: Maybe SearchRequest) }
 
-searchRequestToUrlEncoded ∷ SearchRequest → FormURLEncoded
+searchRequestToUrlEncoded :: SearchRequest → FormURLEncoded
 searchRequestToUrlEncoded { query, page, perPage } = fromArray $
   [ Tuple "query" (Just query)
   , Tuple "per_page" (Just $ show perPage)
   , Tuple "page" (Just $ show page)
   ]
 
-curatedRequestToUrlEncoded ∷ CuratedRequest → FormURLEncoded
+curatedRequestToUrlEncoded :: CuratedRequest → FormURLEncoded
 curatedRequestToUrlEncoded { page, perPage } = fromArray $
   [ Tuple "per_page" (Just $ show perPage)
   , Tuple "page" (Just $ show page)
   ]
 
-urlToSearchRequest:: String -> (Maybe SearchRequest)
+urlToSearchRequest :: String -> (Maybe SearchRequest)
 urlToSearchRequest url = do
   parsedQuery <- (hush <<< parseUrlencoded) =<< (extractQuery url)
   query <- findQueryVal parsedQuery "query"
@@ -54,7 +54,7 @@ urlToSearchRequest url = do
   perPage <- findQueryVal parsedQuery "per_page" >>= fromString
   pure {query: query, page: page, perPage: perPage }
 
-urlToCuratedRequest:: String -> (Maybe CuratedRequest)
+urlToCuratedRequest :: String -> (Maybe CuratedRequest)
 urlToCuratedRequest url = do
   parsedQuery <- (hush <<< parseUrlencoded) =<< (extractQuery url)
   page <- findQueryVal parsedQuery "page" >>= fromString

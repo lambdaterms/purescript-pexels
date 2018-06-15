@@ -36,14 +36,20 @@ buildCuratedRequest (ApiKey apiKey) r =
       , method = Left GET, headers = authHeader : defaultRequest.headers
       }
 
-search :: forall t1 err.
-  ApiKey -> SearchRequest -> Aff( ajax :: AJAX | t1) (V (Array 
-    (Variant (SearchErrorRow err))) SearchPhotos )
+search 
+  :: forall t1 err
+   . ApiKey 
+  -> SearchRequest
+  -> Aff( ajax :: AJAX | t1) (V (Array (Variant (SearchErrorRow err))) SearchPhotos)
 search apiKey request = runValidation 
-  ( getSearchResultfromJson <<< getJson <<< (validateStatus isOK) <<< validateAffjax ) (buildSearchRequest apiKey request)
+  (getSearchResultfromJson <<< getJson <<< (validateStatus isOK) <<< validateAffjax)
+    (buildSearchRequest apiKey request)
 
-curated :: forall t1 err.
-  ApiKey -> CuratedRequest -> Aff( ajax :: AJAX | t1) (V (Array 
-    (Variant ( SearchErrorRow err))) CuratedPhotos )
+curated 
+  :: forall t1 err
+   . ApiKey
+  -> CuratedRequest
+  -> Aff( ajax :: AJAX | t1) (V (Array (Variant ( SearchErrorRow err))) CuratedPhotos)
 curated apiKey request = runValidation 
-  ( getCuratedResultfromJson <<< getJson <<< (validateStatus isOK)<<< validateAffjax ) (buildCuratedRequest apiKey request)
+  (getCuratedResultfromJson <<< getJson <<< (validateStatus isOK)<<< validateAffjax)
+    (buildCuratedRequest apiKey request)

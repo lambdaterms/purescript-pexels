@@ -23,20 +23,26 @@ type JsonErrorRow (err :: # Type) = (parsingError :: String | err)
 type AffjaxErrorRow (err :: # Type) = (remoteError :: String | err)
 type SearchErrorRow (err :: # Type) = HttpErrorRow (JsError (JsonErrorRow (AffjaxErrorRow err)))
 
-validateAffjax :: forall req res ext err.
-  Requestable req => Respondable res => Validation
-    (Aff ( ajax :: AJAX | ext))
-    (Array (Variant (AffjaxErrorRow err)))
-    (AffjaxRequest req)
-    (AffjaxResponse res)
+validateAffjax 
+  :: forall req res ext err
+   . Requestable req 
+  => Respondable res 
+  => Validation
+      (Aff (ajax :: AJAX | ext))
+      (Array (Variant (AffjaxErrorRow err)))
+      (AffjaxRequest req)
+      (AffjaxResponse res)
 validateAffjax = hoistFnMV $ \req → do
     (Valid [] <$> affjax req) `catchError` (\e -> pure (Invalid $ singleton $ (inj (SProxy :: SProxy "remoteError") $ show e)))
 
-validateStatus :: forall m err res.
-  Monad m => (StatusCode -> Boolean) ->Validation m
-    (Array (Variant (HttpErrorRow err)))
-    (AffjaxResponse res)
-    (AffjaxResponse res)
+validateStatus 
+  :: forall m err res
+   . Monad m 
+  => (StatusCode -> Boolean) 
+  -> Validation m
+      (Array (Variant (HttpErrorRow err)))
+      (AffjaxResponse res)
+      (AffjaxResponse res)
 validateStatus isCorrect = hoistFnV checkStatus where
   checkStatus response =
       if isCorrect response.status then
@@ -47,20 +53,24 @@ validateStatus isCorrect = hoistFnV checkStatus where
 isOK :: StatusCode -> Boolean
 isOK (StatusCode n) = (n==200)
 
-getJson :: forall m err.
-  Monad m => Validation m
-    (Array (Variant (JsonErrorRow err)))
-    (AffjaxResponse String)
-    Json
+getJson 
+  :: forall m err
+   . Monad m 
+  => Validation m
+      (Array (Variant (JsonErrorRow err)))
+      (AffjaxResponse String)
+      Json
 getJson = hoistFnV \response -> case jsonParser response.response of
   Right js -> Valid [] js
   Left error -> Invalid  $ singleton $ (inj (SProxy :: SProxy "parsingError") error)
 
-getSearchResultfromJson :: forall err m.
-  Monad m => Validation m
-    (Array (Variant (JsError err) ))
-    Json
-    SearchPhotos
+getSearchResultfromJson 
+  :: forall err m
+   . Monad m 
+  => Validation m
+      (Array (Variant (JsError err)))
+      Json
+      SearchPhotos
 getSearchResultfromJson = collect
   { totalResults: field "total_results" int
   , nextPage: urlToSearchRequest <$> (optionalField "next_page" string)
@@ -70,11 +80,13 @@ getSearchResultfromJson = collect
   , photos: field "photos" $ arrayOf getPhotosfromJson
   }
 
-getCuratedResultfromJson :: forall err m.
-  Monad m => Validation m
-    (Array (Variant (JsError err) ))
-    Json
-    CuratedPhotos
+getCuratedResultfromJson 
+  :: forall err m
+   . Monad m
+  => Validation m
+      (Array (Variant (JsError err)))
+      Json
+      CuratedPhotos
 getCuratedResultfromJson = collect
   { nextPage: urlToCuratedRequest <$> (optionalField "next_page" string)
   , prevPage: urlToCuratedRequest <$> (optionalField "prev_page"  string)
@@ -83,11 +95,13 @@ getCuratedResultfromJson = collect
   , photos: field "photos" $ arrayOf getPhotosfromJson
   }
 
-getPhotosfromJson :: forall err m.
-  Monad m => Validation m
-    (Array (Variant (JsError err) ))
-    Json
-    Photo
+getPhotosfromJson 
+  :: forall err m
+   . Monad m
+  => Validation m
+      (Array (Variant (JsError err)))
+      Json
+      Photo
 getPhotosfromJson = collect
   { id: field "id" int
   ,  width: field "width" int

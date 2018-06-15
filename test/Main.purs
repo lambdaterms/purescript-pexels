@@ -15,10 +15,10 @@ import Key (key)
 import Network.HTTP.Affjax (AJAX, AffjaxResponse, affjax)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Polyform.Validation (runValidation)
+
 --structures for tests
 simpleRequest1 :: SearchRequest
 simpleRequest1 = {query: "dog", page: 1, perPage: 15}
-
 
 rJson :: String
 rJson = "{\"total_results\":876,\"page\":1,\"per_page\":15,\"photos\":[],\"next_page\":\"https://api.pexels.com/v1/search/?page=2&per_page=15&query=dog\"}"
@@ -52,19 +52,10 @@ getJsonTest json = (runValidation getJson) (simpleResponse1 {response = json})
 
 getAndValidateJsonTest json = (runValidation $ getSearchResultfromJson <<< getJson) (simpleResponse1 {response = json})
 
-main :: forall t22.
-  Eff
-  ( ajax :: AJAX
-  , console :: CONSOLE
-  | t22
-  )
-  (Fiber
-      ( ajax :: AJAX
-      , console :: CONSOLE
-      | t22
-      )
-      Unit
-  )
+main 
+  :: forall t22
+   . Eff ( ajax :: AJAX, console :: CONSOLE| t22)
+      (Fiber( ajax :: AJAX, console :: CONSOLE| t22) Unit )
 -- TODO: make "real" tests with asserts
 main = launchAff $ do
   (a :: AffjaxResponse Json) <- affjax $ buildSearchRequest (ApiKey key) simpleRequest1 

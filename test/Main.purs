@@ -4,17 +4,17 @@ import Prelude
 
 import API.Pexels.Methods (buildSearchRequest, curated, search)
 import API.Pexels.Types (ApiKey(ApiKey), CuratedRequest, SearchRequest)
-import API.Pexels.Validation (getJson, getSearchResultfromJson, isOK, validateAffjax, validateStatus)
+import API.Pexels.Validation (getJson, getSearchResultfromJson)
 import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
-import Data.Argonaut (Json)
 import Global.Unsafe (unsafeStringify)
 import Key (key)
-import Network.HTTP.Affjax (AJAX, AffjaxResponse, affjax)
+import Network.HTTP.Affjax (AJAX, AffjaxResponse)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Polyform.Validation (runValidation)
+import Validators.Affjax (affjax, isStatusOK, status)
 
 --structures for tests
 simpleRequest1 :: SearchRequest
@@ -46,19 +46,18 @@ simpleJson1 = "{\"total_results\":10,\"page\":1,\"per_page\":15}"
 
 --functions for running tests
 
-validateStatusTest = (runValidation $ validateStatus isOK) simpleResponse1
+validateStatusTest = (runValidation $ status isStatusOK) simpleResponse1
 
-getJsonTest json = (runValidation getJson) (simpleResponse1 {response = json})
+getJsonTest json = (runValidation getJson) json
 
-getAndValidateJsonTest json = (runValidation $ getSearchResultfromJson <<< getJson) (simpleResponse1 {response = json})
+getAndValidateJsonTest json = (runValidation $ getSearchResultfromJson <<< getJson) json
 
 main 
   :: forall t22
    . Eff ( ajax :: AJAX, console :: CONSOLE| t22)
       (Fiber( ajax :: AJAX, console :: CONSOLE| t22) Unit )
 -- TODO: make "real" tests with asserts
-main = launchAff $ do
-  (a :: AffjaxResponse Json) <- affjax $ buildSearchRequest (ApiKey key) simpleRequest1 
+main = launchAff $ do 
   res1 <- (unsafeStringify <$> validateStatusTest)
   log res1
   res2 <- (unsafeStringify <$> getJsonTest simpleNotJson)
@@ -67,7 +66,7 @@ main = launchAff $ do
   log res3
   res4 <- (unsafeStringify <$> getAndValidateJsonTest rJson)
   log res4
-  resa <- (unsafeStringify <$>  runValidation  (getJson <<< (validateStatus isOK)<<< validateAffjax ) (buildSearchRequest (ApiKey key) simpleRequest1))
+  resa <- (unsafeStringify <$>  runValidation  (getJson <<< (status isStatusOK) <<< affjax ) (buildSearchRequest (ApiKey key) simpleRequest1))
   log resa
   a <- search (ApiKey key) simpleRequest1
   log $ unsafeStringify a

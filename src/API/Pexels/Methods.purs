@@ -3,7 +3,7 @@ module API.Pexels.Methods where
 import Prelude
 
 import API.Pexels.Types (ApiKey(ApiKey), CuratedRequest, SearchPhotos, SearchRequest, CuratedPhotos, curatedRequestToUrlEncoded, searchRequestToUrlEncoded)
-import API.Pexels.Validation (SearchErrorRow, getCuratedResultfromJson, getJson, getSearchResultfromJson)
+import API.Pexels.Validation (getCuratedResultfromJson, getSearchResultfromJson)
 import Control.Monad.Aff (Aff)
 import Data.Array ((:))
 import Data.Either (Either(Left))
@@ -13,7 +13,10 @@ import Data.Variant (Variant)
 import Network.HTTP.Affjax (AJAX, AffjaxRequest, defaultRequest)
 import Network.HTTP.RequestHeader (RequestHeader(..))
 import Polyform.Validation (V, runValidation)
-import Validators.Affjax (affjax, isStatusOK, status)
+import Validators.Affjax (AffjaxErrorRow, HttpErrorRow, JsonErrorRow, affjaxJson)
+import Validators.Json (JsError)
+
+type SearchErrorRow (err :: # Type) = HttpErrorRow (JsError (JsonErrorRow (AffjaxErrorRow err)))
 
 buildSearchRequest :: ApiKey -> SearchRequest -> AffjaxRequest Unit
 buildSearchRequest (ApiKey apiKey) r =
@@ -43,7 +46,7 @@ search
   -> SearchRequest
   -> Aff( ajax :: AJAX | t1) (V (Array (Variant (SearchErrorRow err))) SearchPhotos)
 search apiKey request = runValidation 
-  (getSearchResultfromJson <<< getJson <<< (status isStatusOK) <<< affjax)
+  (getSearchResultfromJson <<< affjaxJson)
     (buildSearchRequest apiKey request)
 
 curated 
@@ -52,5 +55,5 @@ curated
   -> CuratedRequest
   -> Aff( ajax :: AJAX | t1) (V (Array (Variant ( SearchErrorRow err))) CuratedPhotos)
 curated apiKey request = runValidation 
-  (getCuratedResultfromJson <<< getJson <<< (status isStatusOK)<<< affjax)
+  (getCuratedResultfromJson <<< affjaxJson)
     (buildCuratedRequest apiKey request)

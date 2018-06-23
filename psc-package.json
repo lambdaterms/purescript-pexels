@@ -3,7 +3,7 @@
   "set": "df",
   "source": "https://github.com/paluh/package-sets.git",
   "depends": [
-    "validators",
+    "polyform-validators",
     "affjax",
     "console",
     "eff",

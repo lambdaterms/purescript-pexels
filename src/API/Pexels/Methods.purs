@@ -2,25 +2,26 @@ module API.Pexels.Methods where
 
 import Prelude
 
-import API.Pexels.Search (ApiKey(..), Request, Result, toUrlEncoded)
-import API.Pexels.Validation (affjaxJson, stringifyErrs)
-import Control.Alternative ((<|>))
+import API.Pexels.Types (ApiKey(ApiKey), CuratedRequest, SearchPhotos, SearchRequest, CuratedPhotos, curatedRequestToUrlEncoded, searchRequestToUrlEncoded)
+import API.Pexels.Validation (getCuratedResultfromJson, getSearchResultfromJson)
 import Control.Monad.Aff (Aff)
 import Data.Array ((:))
-import Data.Either (Either(..))
+import Data.Either (Either(Left))
 import Data.FormURLEncoded (encode)
-import Data.HTTP.Method (Method(..))
-import Data.Maybe (Maybe(..))
-import Data.Record.Fold (collect)
+import Data.HTTP.Method (Method(GET))
+import Data.Variant (Variant)
 import Network.HTTP.Affjax (AJAX, AffjaxRequest, defaultRequest)
 import Network.HTTP.RequestHeader (RequestHeader(..))
-import Polyform.Validation (Validation(..), hoistFn, hoistFnMV, runValidation)
-import Validators.Json (JsValidation, field, int, optionalField, string)
+import Polyform.Validation (V, runValidation)
+import Validators.Affjax (AffjaxErrorRow, HttpErrorRow, JsonErrorRow, affjaxJson)
+import Validators.Json (JsError)
 
-buildRequest :: ApiKey -> Request -> AffjaxRequest Unit
-buildRequest (ApiKey apiKey) r =
+type SearchErrorRow (err :: # Type) = HttpErrorRow (JsError (JsonErrorRow (AffjaxErrorRow err)))
+
+buildSearchRequest :: ApiKey -> SearchRequest -> AffjaxRequest Unit
+buildSearchRequest (ApiKey apiKey) r =
   let
-    query = r # toUrlEncoded # encode
+    query = r # searchRequestToUrlEncoded # encode
     authHeader = RequestHeader "Authorization" apiKey
   in
     defaultRequest
@@ -28,13 +29,31 @@ buildRequest (ApiKey apiKey) r =
       , method = Left GET, headers = authHeader : defaultRequest.headers
       }
 
-search :: forall e. ApiKey → Validation (Aff (ajax :: AJAX | e)) (Array String) Request Result
-search apiKey = hoistFnMV $ \req -> runValidation
-  (hoistFn (buildRequest apiKey) >>> affjaxJson >>> stringifyErrs searchResult) req
+buildCuratedRequest :: ApiKey -> CuratedRequest -> AffjaxRequest Unit
+buildCuratedRequest (ApiKey apiKey) r =
+  let
+    query = r # curatedRequestToUrlEncoded # encode
+    authHeader = RequestHeader "Authorization" apiKey
+  in
+    defaultRequest
+      { url = "https://api.pexels.com/v1/curated?" <> query
+      , method = Left GET, headers = authHeader : defaultRequest.headers
+      }
 
-searchResult :: forall m. Monad m => JsValidation m Result
-searchResult = collect
-  { totalResults: field "total_results" int
-  , nextPage: optionalField "next_page" (Just <$> string)
-  , prevPage: optionalField "next_page" (Just <$> string)
-  }
+search 
+  :: forall t1 err
+   . ApiKey 
+  -> SearchRequest
+  -> Aff( ajax :: AJAX | t1) (V (Array (Variant (SearchErrorRow err))) SearchPhotos)
+search apiKey request = runValidation 
+  (getSearchResultfromJson <<< affjaxJson)
+    (buildSearchRequest apiKey request)
+
+curated 
+  :: forall t1 err
+   . ApiKey
+  -> CuratedRequest
+  -> Aff( ajax :: AJAX | t1) (V (Array (Variant ( SearchErrorRow err))) CuratedPhotos)
+curated apiKey request = runValidation 
+  (getCuratedResultfromJson <<< affjaxJson)
+    (buildCuratedRequest apiKey request)

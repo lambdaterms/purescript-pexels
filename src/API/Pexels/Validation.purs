@@ -9,10 +9,10 @@ import Data.Variant (Variant)
 import Polyform.Validation (Validation)
 import Validators.Json (JsError, arrayOf, field, int, optionalField, string)
 
-getSearchResultfromJson 
-  :: forall err m
+getSearchResultfromJson
+  ∷ ∀ err m
    . Monad m 
-  => Validation m
+  ⇒ Validation m
       (Array (Variant (JsError err)))
       Json
       SearchPhotos
@@ -25,10 +25,10 @@ getSearchResultfromJson = collect
   , photos: field "photos" $ arrayOf getPhotosfromJson
   }
 
-getCuratedResultfromJson 
-  :: forall err m
+getCuratedResultfromJson
+  ∷ ∀ err m
    . Monad m
-  => Validation m
+  ⇒ Validation m
       (Array (Variant (JsError err)))
       Json
       CuratedPhotos
@@ -40,16 +40,26 @@ getCuratedResultfromJson = collect
   , photos: field "photos" $ arrayOf getPhotosfromJson
   }
 
-getPhotosfromJson 
-  :: forall err m
+getPhotosfromJson
+  ∷ ∀ err m
    . Monad m
-  => Validation m
+  ⇒ Validation m
       (Array (Variant (JsError err)))
       Json
       Photo
 getPhotosfromJson = collect
   { id: field "id" int
-  ,  width: field "width" int
+  , width: field "width" int
   , height: field  "height" int
+  , src: field "src" $ collect
+    { landscape: field "landscape" string
+    , large: field "large" string
+    , large2x: field "large2x" string
+    , medium: field "medium" string
+    , original : field "original" string
+    , portrait : field "portrait" string
+    , small : field "small" string
+    , tiny : field "tiny" string
+    }
   , url: field "url" string
   }

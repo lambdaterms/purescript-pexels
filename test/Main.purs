@@ -1,5 +1,5 @@
 module Test.Main where
-  
+
 import Prelude
 
 import API.Pexels.Methods (curated, search)
@@ -20,7 +20,7 @@ simpleCuratedRequest :: CuratedRequest
 simpleCuratedRequest = {page: 1, perPage: 15}
 
 
-main 
+main
   :: forall t22
    . Eff ( ajax :: AJAX, console :: CONSOLE| t22)
       (Fiber( ajax :: AJAX, console :: CONSOLE| t22) Unit )

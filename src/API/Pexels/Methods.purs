@@ -49,11 +49,11 @@ search apiKey request = runValidation
   (getSearchResultfromJson <<< affjaxJson)
     (buildSearchRequest apiKey request)
 
-curated 
+curated
   :: forall t1 err
    . ApiKey
   -> CuratedRequest
   -> Aff( ajax :: AJAX | t1) (V (Array (Variant ( SearchErrorRow err))) CuratedPhotos)
-curated apiKey request = runValidation 
+curated apiKey request = runValidation
   (getCuratedResultfromJson <<< affjaxJson)
     (buildCuratedRequest apiKey request)

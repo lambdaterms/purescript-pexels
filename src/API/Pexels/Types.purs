@@ -26,7 +26,7 @@ type CuratedRequest = { | BaseRequest ()}
 -- tiny - This image has a width of 280px and height of 200px.
 
 type Photo =
-  { id :: Int
+  { id :: String
   , width :: Int
   , height :: Int
   , src ::

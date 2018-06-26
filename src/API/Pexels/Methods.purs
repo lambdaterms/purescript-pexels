@@ -40,12 +40,12 @@ buildCuratedRequest (ApiKey apiKey) r =
       , method = Left GET, headers = authHeader : defaultRequest.headers
       }
 
-search 
+search
   :: forall t1 err
    . ApiKey 
   -> SearchRequest
   -> Aff( ajax :: AJAX | t1) (V (Array (Variant (SearchErrorRow err))) SearchPhotos)
-search apiKey request = runValidation 
+search apiKey request = runValidation
   (getSearchResultfromJson <<< affjaxJson)
     (buildSearchRequest apiKey request)
 

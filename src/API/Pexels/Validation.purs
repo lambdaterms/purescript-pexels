@@ -48,7 +48,7 @@ getPhotosfromJson
       Json
       Photo
 getPhotosfromJson = collect
-  { id: field "id" int
+  { id: field "id" string
   , width: field "width" int
   , height: field  "height" int
   , src: field "src" $ collect

@@ -42,7 +42,7 @@ buildCuratedRequest (ApiKey apiKey) r =
 
 search
   :: forall t1 err
-   . ApiKey 
+   . ApiKey
   -> SearchRequest
   -> Aff( ajax :: AJAX | t1) (V (Array (Variant (SearchErrorRow err))) SearchPhotos)
 search apiKey request = runValidation

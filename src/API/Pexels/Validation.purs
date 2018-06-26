@@ -4,14 +4,17 @@ import Prelude
 
 import API.Pexels.Types (CuratedPhotos, Photo, SearchPhotos, urlToCuratedRequest, urlToSearchRequest)
 import Data.Argonaut (Json)
+import Data.Array (last)
+import Data.Maybe (Maybe(..))
 import Data.Record.Fold (collect)
+import Data.String (Pattern(..), split)
 import Data.Variant (Variant)
-import Polyform.Validation (Validation)
-import Validators.Json (JsError, arrayOf, field, int, optionalField, string)
+import Polyform.Validation (Validation, hoistFn, hoistFnV)
+import Validators.Json (JsError, arrayOf, failure, field, int, optionalField, string)
 
 getSearchResultfromJson
   ∷ ∀ err m
-   . Monad m 
+   . Monad m
   ⇒ Validation m
       (Array (Variant (JsError err)))
       Json
@@ -48,7 +51,9 @@ getPhotosfromJson
       Json
       Photo
 getPhotosfromJson = collect
-  { id: field "id" string
+  { id: field "url" string >>> hoistFn (split (Pattern "/") >>> last) >>> (hoistFnV $ case _ of
+      Nothing → failure "Unable to parse out \"id\" value"
+      Just i → pure i)
   , width: field "width" int
   , height: field  "height" int
   , src: field "src" $ collect

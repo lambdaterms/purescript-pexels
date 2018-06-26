@@ -4,7 +4,7 @@ import Prelude
 
 import API.Pexels.Types (CuratedPhotos, Photo, SearchPhotos, urlToCuratedRequest, urlToSearchRequest)
 import Data.Argonaut (Json)
-import Data.Array (last)
+import Data.Array (filter, last)
 import Data.Maybe (Maybe(..))
 import Data.Record.Fold (collect)
 import Data.String (Pattern(..), split)
@@ -51,7 +51,7 @@ getPhotosfromJson
       Json
       Photo
 getPhotosfromJson = collect
-  { id: field "url" string >>> hoistFn (split (Pattern "/") >>> last) >>> (hoistFnV $ case _ of
+  { id: field "url" string >>> hoistFn (split (Pattern "/") >>> filter ("" /= _) >>> last) >>> (hoistFnV $ case _ of
       Nothing → failure "Unable to parse out \"id\" value"
       Just i → pure i)
   , width: field "width" int
